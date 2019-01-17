@@ -1,0 +1,193 @@
+\documentclass[12pt]{article}%
+\usepackage{amsfonts}
+\usepackage{fancyhdr}
+\usepackage{comment}
+\usepackage[a4paper, top=2.5cm, bottom=2.5cm, left=2.2cm, right=2.2cm]%
+{geometry}
+\usepackage{times}
+\usepackage{amsmath}
+\usepackage{changepage}
+\usepackage{amssymb}
+\usepackage{graphicx}%
+\usepackage{bm}
+\setcounter{MaxMatrixCols}{30}
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\Z}{\mathbb{Z}}
+
+\begin{document}
+
+\title{CS280 Fall 2018 Assignment 2 \\ Part A}
+\author{CNNs}
+\date{Due in class, Nov 02, 2018}
+\maketitle
+
+\paragraph{Name: Zhijuan HU}
+
+\paragraph{Student ID: 67856754}
+
+\newpage
+
+\section*{1. Linear Regression(10 points)}
+\begin{itemize}
+	\item Linear regression has the form $E[y\lvert x] = w_{0} + \bm{w^{T}}x$. It is possible to solve for $\bm{w}$ and $w_{0}$ seperately. Show that
+	\begin{equation*}
+	w_{0} = \frac{1}{n}\sum_{i}y_{i} - \frac{1}{n}\sum_{i}x_{i}^{T}\bm{w} = \overline{y} - \overline{x}^{T}\bm{w} 
+	\end{equation*}
+	
+	\begin{proof}
+		Since $L = \sum_{i} (w_0 + \mathbf{w}^Tx_{i} - y_{i})^2$, let $\triangledown_{x_{i}} L = 0$, 
+		
+		 we have 
+		 \begin{align*}
+		 nw_0 & + \bm{w}^T \sum_{i} x_i = \sum_{i} y_i \\
+		 w_{0} &= \frac{1}{n}\sum_{i}y_{i} - \frac{1}{n}\sum_{i}x_{i}^{T}\bm{w} \\
+		 &= \overline{y} - \overline{x}^{T}\bm{w} 
+		 \end{align*}
+	\end{proof}
+	
+	
+	\item Show how to cast the problem of linear regression with respect to the absolute value loss function, $l(h,x,y)=\lvert h(x) - y \rvert$, as a linear program. \\
+	\begin{proof}  \\
+		First prove by contradiction that $\lvert c \lvert = \min_{a \geq 0} a$ where $ a \geq c$ and $ -a \geq c $. Suppose $ \lvert c \lvert  \neq \min_{a \geq 0} $ where $ a \geq c$ and $ -a \leq c$, then $ \exists b $ where $ b = \lvert c \lvert $ and rather $ b < a$ or $ b>a$. If $ b>a$, then $b>a>c$, which can not happen and $b<a$, then $-b >-a \geq -c$, which can not happen as well. Let $a=(a_1, \dots, a_m)$ where $a_i \geq <w,x> - y_i $ and $<w,x> - y_i \geq -a_i$. Thus $\min_w \sum_{i=1}^{m} \lvert <w,x> - y_i \lvert = \min_{a_i >0} \sum_{i=1}^{m} a_i$. Let $c=[1, \dots, 1] \in \mathbb{R}^m, v=[<w,x> - y_1, \dots, <w,x>-y_m] \in \mathbf{R}^m$. Then $\min_{a_i >0} \sum_{i=1}^{m} <c,a>$ where $a \geq v$ and $-a \leq v$.
+	\end{proof}
+	
+	
+\end{itemize}
+
+\newpage
+
+\section*{2. Convolution Layers (5 points)}
+We have a video sequence and we would like to design a 3D convolutional neural network to recognize events in the video. The frame size is 32x32 and each video has 30 frames. Let's consider the first convolutional layer.  
+\begin{itemize}
+	\item We use a set of $5\times 5\times 5$ convolutional kernels. Assume we have 64 kernels and apply stride 2 in spatial domain and 4 in temporal domain, what is the size of output feature map? Use proper padding if needed and clarify your notation.
+	
+	From the description above, denote $T, H, W, C_1$ are the temporal domain, height, width, channel input, for the video (since inputs are RGB, it have there channel ); $K_t, K_h, K_w, C_2$ are the temporal, height, width, channel output, for the kernel. Hence, 
+	
+	\begin{align*}
+	inputs &= T \times H \times W \times C_1 \\
+	&= 30 \times 32 \times 32 \times 3 \\
+	Kernels &= K_t \times K_h \times K_w \times C_1 \times C_2 \\
+	&= 5 \times 5 \times 5 \times 3 \times 64
+	\end{align*}
+	
+	From the equation,
+	\begin{align*}
+	t &= (T - K_t + Pad_t)/stride + 1 \\
+	h &= (H - K_h + Pad_h)/stride + 1 \\
+	w &= (W - K_w + Pad_w)/stride + 1
+	\end{align*}
+	Set, $Pad_t = 3, Pad_h = 1, Pad_w = 1$, we have
+	\begin{align*}
+	t = \dfrac{(30 - 5 + 3)}{4} + 1 = 8\\
+	h = \dfrac{(32 - 5 + 1)}{2} + 1 = 15 \\
+	w = \dfrac{(32 - 5 + 1)}{2} + 1 = 15
+	\end{align*}
+	hence, 
+	\begin{align*}
+	Outputs &= t \times h \times w \times C_2 \\
+	&= 8 \times 15 \times 15 \times 64
+	\end{align*}
+	 
+	
+	
+	
+	
+	
+	\item We want to keep the resolution of the feature map and decide to use the dilated convolution. Assume we have one kernel only with size $7\times 7\times 5$ and apply a dilated convolution of rate $3$. What is the size of the output feature map? What are the downsampling and upsampling strides if you want to compute the same-sized feature map without using dilation?   
+\end{itemize}
+Note: You need to write down the derivation of your results.\\
+
+By using Dilated convolution, we have the equation,
+\begin{align*}
+\hat{K} &= 1 + rate \times (K-1)\\
+X_{out} &= (X_{in} - \hat{K} + Pad)/stride + 1
+\end{align*}
+Hence, 
+\begin{align*}
+\hat{K}_t &= 1 + 3\times(5-1)=13\\
+\hat{K}_h &= 1 + 3\times(7-1)=19\\
+\hat{K}_w &= 1 + 3\times(7-1)=19 
+\end{align*}
+Set $Pad_t = 12, Pad_h = 18, Pad_w = 18$,  we have
+\begin{align*}
+t &= \dfrac{(30 - 13 + Pad_t)}{1} + 1 = 30 \\
+h &= \dfrac{(32 - 19 + Pad_h)}{1} + 1 = 32 \\
+w &= \dfrac{(32 - 19 + Pad_w)}{1} + 1 = 32
+\end{align*}
+Hence, 
+\begin{align*}
+Outputs &= t \times h \times w \times C_1 \times C_2 \\
+&= 30 \times 32 \times 32 \times 3 \times 1
+\end{align*}
+the reason for last term $1$ is for using one kernel. \\
+
+If we want to compute the same-sized feature map without using dilation, the downsampling and upsampling stride we can set 1.
+Since 
+\begin{align*}
+	t &= 1 + \dfrac{(30 + Pad_t - 5)}{1} = 30 \\
+	h &= 1 + \dfrac{(32 + Pad_h - 7)}{1} = 32 \\
+	w &= 1+ \dfrac{(32  + Pad_w - 7)}{1} = 32
+\end{align*}
+where $Pad_t = 4, Pad_h = 6, Pad_w =6$.
+\newpage
+
+\section*{3. Batch Normalization (5 points)}
+With Batch Normalization (BN), show that backpropagation through a layer is unaffected by the scale of its parameters. 
+\begin{itemize}
+	\item Show that \[BN(\mathbf{Wu})=BN((a\mathbf{W})\mathbf{u})\] where $\mathbf{u}$ is the input vector and $\mathbf{W}$ is the weight matrix, $a$ is a scalar. 
+	
+	\begin{proof}
+		Since 
+		\begin{align*}
+		BN((\alpha \mathbf{W}) \mathbf{u}) &= \dfrac{(\alpha \mathbf{W}) \mathbf{u} - \mathbb{E}[
+			(\alpha \mathbf{W}) \mathbf{u}]}{ \sqrt{Var[(\alpha \mathbf{W}) \mathbf{u}]}} \\
+		&= \dfrac{\alpha \mathbf{Wu}  - \alpha \mathbb{E}[\mathbf{Wu}]}{\alpha \sqrt{ Var[ \mathbf{Wu} ]}} \\
+		&= \dfrac{\mathbf{Wu} - \mathbb{E}[\mathbf{Wu}]}{\sqrt{Var[\mathbf{Wu}]}} \\
+		&= BN(\mathbf{Wu})
+		\end{align*}
+	\end{proof}
+	
+	
+	
+	\item (Bonus: 5 pts) Show that 
+	\[\frac{\partial BN((a\mathbf{W})\mathbf{u})}{\partial \mathbf{u}}=\frac{\partial BN(\mathbf{W}\mathbf{u})}{\partial \mathbf{u}}\]
+	\begin{proof}
+		Since $$BN(\mathbf{(Wu)}) = BN((\alpha \mathbf{W})\mathbf{u}),$$
+		we have 
+		\[\frac{\partial BN((a\mathbf{W})\mathbf{u})}{\partial \mathbf{u}}=\frac{\partial BN(\mathbf{W}\mathbf{u})}{\partial \mathbf{u}}\]
+    \end{proof}
+\end{itemize}
+\newpage
+
+
+
+\newpage
+
+
+
+\end{document}\grid
